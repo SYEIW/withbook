@@ -1,77 +1,26 @@
-<!-- index.html -->
-<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="UTF-8">
-  <title>Wish Book</title>
-  <script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
-  <style>
-    body { font-family: sans-serif; padding: 20px; background: #fffdf8; }
-    input, textarea, button { width: 100%; margin: 10px 0; padding: 10px; border-radius: 5px; }
-    .wish-preview img { max-width: 100%; margin-top: 10px; border-radius: 8px; }
-    .qr { margin-top: 30px; text-align: center; }
-  </style>
-</head>
-<body>
+<form id="wish-form">
+  <input type="text" id="name" placeholder="ชื่อของคุณ" required>
+  <textarea id="message" placeholder="ข้อความอวยพร" required></textarea>
+  <input type="file" id="image">
+  <button type="submit">ส่งคำอวยพร</button>
+</form>
 
-  <h2>Bobby & Eiw's Online Wish Book</h2>
+<script>
+document.getElementById("wish-form").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const name = document.getElementById("name").value;
+  const message = document.getElementById("message").value;
+  const image = ""; // ยังไม่ใช้ image จริง (ถ้าไม่ใช้ Firebase หรือ Cloudinary)
 
-  <form id="wishForm">
-    <input type="text" id="name" placeholder="Your name" required>
-    <textarea id="message" rows="4" placeholder="Your wish..." required></textarea>
-    <input type="file" id="imageInput" accept="image/*">
-    <button type="submit">Submit Wish</button>
-  </form>
-
-  <div class="wish-preview" id="preview"></div>
-
-  <div class="qr">
-    <h3>Scan to leave a wish</h3>
-    <canvas id="qrCanvas"></canvas>
-  </div>
-
-  <script>
-    const form = document.getElementById('wishForm');
-    const imageInput = document.getElementById('imageInput');
-    const preview = document.getElementById('preview');
-    const scriptURL = 'https://script.google.com/macros/s/AKfycbzWLmDRI6VB3s0OHIvAnBvVElDNI2r11X4YqjQXb_e85AwYP6gb4U9YbdAdwmq0SxXY/exec'; // Replace with your actual Apps Script URL
-
-    form.addEventListener('submit', function(e) {
-      e.preventDefault();
-      const name = document.getElementById('name').value.trim();
-      const message = document.getElementById('message').value.trim();
-      const file = imageInput.files[0];
-
-      if (!name || !message) return;
-
-      if (file) {
-        const reader = new FileReader();
-        reader.onload = function(event) {
-          const imageBase64 = event.target.result;
-          sendToSheet(name, message, imageBase64);
-          preview.innerHTML = `<p>Thank you, ${name}!</p><img src="${imageBase64}" />`;
-        };
-        reader.readAsDataURL(file);
-      } else {
-        sendToSheet(name, message, '');
-        preview.innerHTML = `<p>Thank you, ${name}!</p>`;
-      }
-
-      form.reset();
+  try {
+    await fetch("https://script.google.com/macros/s/AKfycbzWLmDRI6VB3s0OHIvAnBvVElDNI2r11X4YqjQXb_e85AwYP6gb4U9YbdAdwmq0SxXY/exec", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name, message, image })
     });
-
-    function sendToSheet(name, message, image) {
-      fetch(scriptURL, {
-        method: 'POST',
-        body: JSON.stringify({ name, message, image }),
-        headers: { 'Content-Type': 'application/json' }
-      }).then(res => console.log("Success")).catch(err => alert("Error sending wish."));
-    }
-
-    // Generate QR Code to this page
-    QRCode.toCanvas(document.getElementById('qrCanvas'), window.location.href, function (error) {
-      if (error) console.error(error);
-    });
-  </script>
-</body>
-</html>
+    alert("ส่งคำอวยพรเรียบร้อยแล้ว ❤️");
+  } catch (err) {
+    alert("❌ Error sending wish.");
+  }
+});
+</script>
