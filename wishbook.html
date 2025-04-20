@@ -1,26 +1,82 @@
-<form id="wish-form">
-  <input type="text" id="name" placeholder="ชื่อของคุณ" required>
-  <textarea id="message" placeholder="ข้อความอวยพร" required></textarea>
-  <button type="submit">ส่งคำอวยพร</button>
-</form>
 
-<script>
-document.getElementById("wish-form").addEventListener("submit", async (e) => {
-  e.preventDefault();
-  const name = document.getElementById("name").value;
-  const message = document.getElementById("message").value;
-  const image = ""; // ยังไม่แนบรูป
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Bobby & Eiw Wish Book</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      background-color: #fbeff2;
+      color: #444;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+    .wish-form {
+      background: white;
+      padding: 2rem;
+      border-radius: 20px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      width: 100%;
+      max-width: 400px;
+    }
+    input, textarea, button {
+      width: 100%;
+      margin: 10px 0;
+      padding: 10px;
+      border-radius: 10px;
+      border: 1px solid #ccc;
+      font-size: 1rem;
+    }
+    button {
+      background-color: #f7c8d3;
+      border: none;
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #f2a0b0;
+    }
+  </style>
+</head>
+<body>
+  <form class="wish-form" id="wish-form">
+    <h2>💌 ส่งคำอวยพรถึง Bobby & Eiw</h2>
+    <input type="text" id="name" placeholder="ชื่อของคุณ" required />
+    <textarea id="message" rows="5" placeholder="เขียนข้อความอวยพร..." required></textarea>
+    <button type="submit">ส่งคำอวยพร</button>
+    <p id="status" style="color: green;"></p>
+  </form>
 
-  try {
-    await fetch("https://script.google.com/macros/s/AKfycbzWLmDRI6VB3s0OHIvAnBvVElDNI2r11X4YqjQXb_e85AwYP6gb4U9YbdAdwmq0SxXY/exec", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name, message, image })
+  <script>
+    document.getElementById("wish-form").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const name = document.getElementById("name").value;
+      const message = document.getElementById("message").value;
+      const status = document.getElementById("status");
+
+      try {
+        const response = await fetch("https://script.google.com/macros/s/AKfycbzWLmDRI6VB3s0OHIvAnBvVElDNI2r11X4YqjQXb_e85AwYP6gb4U9YbdAdwmq0SxXY/exec", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ name, message, image: "" })
+        });
+
+        if (response.ok) {
+          status.innerText = "🎉 ส่งคำอวยพรเรียบร้อยแล้ว!";
+          document.getElementById("wish-form").reset();
+        } else {
+          status.innerText = "❌ เกิดข้อผิดพลาดในการส่งคำอวยพร";
+        }
+      } catch (err) {
+        status.innerText = "❌ ไม่สามารถเชื่อมต่อกับเซิร์ฟเวอร์ได้";
+        console.error(err);
+      }
     });
-    alert("ส่งคำอวยพรเรียบร้อยแล้ว 🎉");
-  } catch (err) {
-    alert("❌ Error sending wish.");
-    console.error(err);
-  }
-});
-</script>
+  </script>
+</body>
+</html>
