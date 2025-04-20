@@ -1,76 +1,77 @@
+<!-- index.html -->
 <!DOCTYPE html>
-<html lang="th">
+<html>
 <head>
   <meta charset="UTF-8">
-  <title>สมุดอวยพร + แนบรูป</title>
+  <title>Wish Book</title>
+  <script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
   <style>
-    body {
-      font-family: 'Sarabun', sans-serif;
-      background: #fff4f4;
-      padding: 30px;
-      text-align: center;
-    }
-    form {
-      background: white;
-      padding: 20px;
-      border-radius: 10px;
-      display: inline-block;
-      box-shadow: 0 0 10px rgba(0,0,0,0.1);
-      width: 90%;
-      max-width: 400px;
-    }
-    input, textarea {
-      width: 100%;
-      margin: 10px 0;
-      padding: 10px;
-      font-size: 16px;
-    }
-    button {
-      padding: 10px 20px;
-      font-size: 16px;
-      background: #ff6f91;
-      border: none;
-      color: white;
-      border-radius: 5px;
-      cursor: pointer;
-    }
+    body { font-family: sans-serif; padding: 20px; background: #fffdf8; }
+    input, textarea, button { width: 100%; margin: 10px 0; padding: 10px; border-radius: 5px; }
+    .wish-preview img { max-width: 100%; margin-top: 10px; border-radius: 8px; }
+    .qr { margin-top: 30px; text-align: center; }
   </style>
 </head>
 <body>
 
-  <h2>📸 สมุดอวยพรพร้อมรูปภาพ 🎉</h2>
+  <h2>Bobby & Eiw's Online Wish Book</h2>
 
   <form id="wishForm">
-    <input type="text" name="name" placeholder="ชื่อของคุณ" required />
-    <textarea name="message" rows="4" placeholder="คำอวยพรของคุณ..." required></textarea>
-    <input type="file" name="image" accept="image/*" required />
-    <button type="submit">ส่งคำอวยพร</button>
+    <input type="text" id="name" placeholder="Your name" required>
+    <textarea id="message" rows="4" placeholder="Your wish..." required></textarea>
+    <input type="file" id="imageInput" accept="image/*">
+    <button type="submit">Submit Wish</button>
   </form>
 
-  <p id="responseMessage" style="margin-top: 20px;"></p>
+  <div class="wish-preview" id="preview"></div>
+
+  <div class="qr">
+    <h3>Scan to leave a wish</h3>
+    <canvas id="qrCanvas"></canvas>
+  </div>
 
   <script>
     const form = document.getElementById('wishForm');
-    const responseMessage = document.getElementById('responseMessage');
+    const imageInput = document.getElementById('imageInput');
+    const preview = document.getElementById('preview');
+    const scriptURL = 'https://script.google.com/macros/s/AKfycbzWLmDRI6VB3s0OHIvAnBvVElDNI2r11X4YqjQXb_e85AwYP6gb4U9YbdAdwmq0SxXY/exec'; // Replace with your actual Apps Script URL
 
-    form.addEventListener('submit', e => {
+    form.addEventListener('submit', function(e) {
       e.preventDefault();
-      const formData = new FormData(form);
+      const name = document.getElementById('name').value.trim();
+      const message = document.getElementById('message').value.trim();
+      const file = imageInput.files[0];
 
-      fetch('https://script.google.com/macros/s/AKfycbzWLmDRI6VB3s0OHIvAnBvVElDNI2r11X4YqjQXb_e85AwYP6gb4U9YbdAdwmq0SxXY/exec', {
+      if (!name || !message) return;
+
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = function(event) {
+          const imageBase64 = event.target.result;
+          sendToSheet(name, message, imageBase64);
+          preview.innerHTML = `<p>Thank you, ${name}!</p><img src="${imageBase64}" />`;
+        };
+        reader.readAsDataURL(file);
+      } else {
+        sendToSheet(name, message, '');
+        preview.innerHTML = `<p>Thank you, ${name}!</p>`;
+      }
+
+      form.reset();
+    });
+
+    function sendToSheet(name, message, image) {
+      fetch(scriptURL, {
         method: 'POST',
-        body: formData
-      })
-      .then(res => res.text())
-      .then(data => {
-        responseMessage.innerHTML = "✅ ขอบคุณสำหรับคำอวยพร พร้อมรูปภาพ 💖";
-        form.reset();
-      })
-      .catch(err => {
-        responseMessage.innerHTML = "❌ เกิดข้อผิดพลาด: " + err;
-      });
+        body: JSON.stringify({ name, message, image }),
+        headers: { 'Content-Type': 'application/json' }
+      }).then(res => console.log("Success")).catch(err => alert("Error sending wish."));
+    }
+
+    // Generate QR Code to this page
+    QRCode.toCanvas(document.getElementById('qrCanvas'), window.location.href, function (error) {
+      if (error) console.error(error);
     });
   </script>
-
 </body>
 </html>
