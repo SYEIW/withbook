@@ -1,7 +1,6 @@
 <form id="wish-form">
   <input type="text" id="name" placeholder="ชื่อของคุณ" required>
   <textarea id="message" placeholder="ข้อความอวยพร" required></textarea>
-  <input type="file" id="image">
   <button type="submit">ส่งคำอวยพร</button>
 </form>
 
@@ -10,7 +9,7 @@ document.getElementById("wish-form").addEventListener("submit", async (e) => {
   e.preventDefault();
   const name = document.getElementById("name").value;
   const message = document.getElementById("message").value;
-  const image = ""; // ยังไม่ใช้ image จริง (ถ้าไม่ใช้ Firebase หรือ Cloudinary)
+  const image = ""; // ยังไม่แนบรูป
 
   try {
     await fetch("https://script.google.com/macros/s/AKfycbzWLmDRI6VB3s0OHIvAnBvVElDNI2r11X4YqjQXb_e85AwYP6gb4U9YbdAdwmq0SxXY/exec", {
@@ -18,9 +17,10 @@ document.getElementById("wish-form").addEventListener("submit", async (e) => {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ name, message, image })
     });
-    alert("ส่งคำอวยพรเรียบร้อยแล้ว ❤️");
+    alert("ส่งคำอวยพรเรียบร้อยแล้ว 🎉");
   } catch (err) {
     alert("❌ Error sending wish.");
+    console.error(err);
   }
 });
 </script>
