@@ -1,165 +1,165 @@
 <!DOCTYPE html>
-<html lang="th">
-<head>
-  <meta charset="UTF-8">
-  <title>สมุดลงทะเบียน</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet">
-  <script src="https://code.jquery.com/jquery-3.6.2.min.js"></script>
-  <link href="https://cdn.datatables.net/1.13.1/css/jquery.dataTables.min.css" rel="stylesheet">
-  <script src="https://cdn.datatables.net/1.13.1/js/jquery.dataTables.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.4/moment.min.js"></script>
-</head>
-<body>
-  <div class="container py-5">
-    <div class="text-center">
-      <h2>สมุดลงทะเบียน5</h2>
-      <p class="lead">กรุณากรอกข้อมูล</p>
-    </div>
-
-    <div class="row">
-      <div class="col-md-5">
-        <div>โหมด: <span id="mode">เพิ่ม</span></div>
-        <input type="hidden" id="dataId">
-
-        <div class="mb-3">
-          <label>ชื่อ-สกุล</label>
-          <input type="text" id="name" class="form-control">
-        </div>
-
-        <div class="mb-3">
-          <label>แผนก</label>
-          <select id="department" class="form-select">
-            <option value="">เลือก...</option>
-            <option value="Dev">Dev</option>
-            <option value="Engineer">Engineer</option>
-            <option value="Hr">Hr</option>
-          </select>
-        </div>
-
-        <div class="d-grid gap-2 d-md-block">
-          <button onclick="addData()" class="btn btn-primary">เพิ่ม</button>
-          <button onclick="updateData()" class="btn btn-warning">อัพเดท</button>
-          <button onclick="resetForm()" class="btn btn-secondary">รีเซ็ต</button>
-        </div>
+<html>
+  <head>
+    <base target="_top">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+    <script src="https://code.jquery.com/jquery-3.6.2.min.js" integrity="sha256-2krYZKh//PcchRtd+H+VyyQoZ/e3EcrkxhM8ycwASPA=" crossorigin="anonymous"></script>
+    <link href="https://cdn.datatables.net/1.13.1/css/jquery.dataTables.min.css" rel="stylesheet">
+    <script src="https://cdn.datatables.net/1.13.1/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.4/moment.min.js"></script>
+  </head>
+  <body>
+    <div class="container-fluid">
+      <div class="py-5 text-center">
+        <img class="d-block mx-auto mb-4" src="https://brilliantpy.com/wp-content/uploads/2021/07/cropped-logo_circle_v2_whitebg.jpg" alt="" width="72" height="72">
+        <h2>แบบฟอร์มลงทะเบียน</h2>
+        <p class="lead">กรุณากรอกข้อมูลด้านล่างให้ครบถ้วน</p>
       </div>
 
-      <div class="col-md-7">
-        <table id="my_table" class="display" style="width:100%"></table>
+      <div class="row">
+        <div class="col-5">
+          <div class="mb-3">
+            โหมด: <span id="mode">เพิ่ม</span>
+          </div>
+
+          <div class="row mb-3">
+            <div class="col-6">
+              <label for="name" class="form-label">ชื่อ-สกุล</label>
+              <input type="text" class="form-control" id="name">
+            </div>
+            <div class="col-6">
+              <label for="department" class="form-label">แผนก</label>
+              <select class="form-select" aria-label="Default select example" id="department">
+                <option selected value="">Choose..</option>
+                <option value="Dev">Dev</option>
+                <option value="Engineer">Engineer</option>
+                <option value="Hr">Hr</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="row mb-3">
+            <div class="col-4 d-grid">
+              <input type="button" class="btn btn-primary" value="เพิ่ม" onclick="addData()">
+            </div>
+            <div class="col-4 d-grid">
+              <input type="button" class="btn btn-primary" value="อัพเดท" onclick="updateData()">
+            </div>
+            <div class="col-4 d-grid">
+              <input type="button" class="btn btn-primary" value="รีเซ็ท" onclick="resetData()">
+            </div>
+          </div>
+        </div>
+
+        <div class="col-7">
+          <table id="my_table" class="display" width="100%"></table>
+        </div>
       </div>
     </div>
-  </div>
 
-<script>
-const webAppUrl = "https://script.google.com/macros/s/AKfycbzS1DFFmuchGo8Wd17pSmdeUuDsZeJNjKPnNGxYD1I7AbfhODK-gjHaWChZb9CkeQSa/exec"; // ใส่ URL ของคุณ
+    <script>
+      readData();
 
-function addData() {
-  let name = $("#name").val();
-  let department = $("#department").val();
-fetch(webAppUrl, {
-  method: 'POST',
-  headers: {
-    'Content-Type': 'application/json'
-  },
-  body: JSON.stringify(data),
-  mode: 'no-cors'  // ไม่แนะนำวิธีนี้
-})
-  .then(res => res.text())
-  .then(res => {
-    console.log(res);
-    resetForm();
-    readData();
-  });
-}
+      function addData() {
+        let name = $("#name").val();
+        let department = $("#department").val();
+        console.log(name, department);
+        google.script.run.withSuccessHandler(function(res) {
+          resetData();
+          readData();
+        }).addDataValue(name, department);   
+      }
 
-function readData() {
-  fetch(webAppUrl, {
-    method: "POST",
-    body: new URLSearchParams({
-      action: "readDataValue"
-    })
-  })
-  .then(res => res.json())
-  .then(data => {
-    $('#my_table').DataTable({
-      data: data,
-      destroy: true,
-      columns: [
-        { title: "เวลา", render: data => moment(data).format("DD/MM/YYYY HH:mm:ss") },
-        { title: "ID" },
-        { title: "ชื่อ" },
-        { title: "แผนก" },
-        { title: "แก้ไข", render: () => `<button onclick="editData(this)" class="btn btn-sm btn-info">แก้ไข</button>` },
-        { title: "ลบ", render: () => `<button onclick="removeData(this)" class="btn btn-sm btn-danger">ลบ</button>` }
-      ]
-    });
-  });
-}
+      function readData() {
+        google.script.run.withSuccessHandler(function(res) {
+          console.log(res, typeof(res));
+          try {
+            res = JSON.parse(res);
+          } catch {}
+          console.log(res, typeof(res));
+          $('#my_table').DataTable({
+            data: res,
+            columns: [
+              {
+                title: 'ประทับเวลา',
+                'render': function(data, type) {
+                  data = moment(data).format("DD/MM/YYYY HH:mm:ss");
+                  return data;
+                }
+              },
+              {title: 'ID'},
+              {title: 'ชื่อ-สกุล'},
+              {title: 'แผนก'},
+              {
+                title: 'แก้ไข',
+                'render': function(data, type) {
+                  return `<input type="button" value="แก้ไข" onclick="editData(this)">`;
+                }
+              },
+              {
+                title: 'ลบ',
+                'render': function(data, type) {
+                  return `<input type="button" value="ลบ" onclick="removeData(this)">`;
+                }
+              }
+            ],
+            "bDestroy": true
+          });
+        }).readDataValue();   
+      }
 
-function editData(ele) {
-  let dataId = $(ele).closest('tr').find('td:nth-child(2)').text();
-  fetch(webAppUrl, {
-    method: "POST",
-    body: new URLSearchParams({
-      action: "getDataValue",
-      dataId: dataId
-    })
-  })
-  .then(res => res.json())
-  .then(data => {
-    $("#dataId").val(data[1]);
-    $("#name").val(data[2]);
-    $("#department").val(data[3]);
-    $("#mode").text("แก้ไข: " + data[1]);
-  });
-}
+      function editData(ele) {
+        let dataId = $(ele).parents("tr").find("td:nth-child(2)").text();
+        console.log(dataId);
+        google.script.run.withSuccessHandler(function(res) {
+          console.log(res, typeof(res));
+          try {
+            res = JSON.parse(res);
+          } catch {}
+          console.log(res, typeof(res));
+          let id = res[1];
+          let name = res[2];
+          let department = res[3];
+          setMode('edit', id);
+          $("#name").val(name);
+          $("#department").val(department);
+        }).getDataValue(dataId);   
+      }
 
-function updateData() {
-  let dataId = $("#dataId").val();
-  let name = $("#name").val();
-  let department = $("#department").val();
-  fetch(webAppUrl, {
-    method: "POST",
-    body: new URLSearchParams({
-      action: "updateDataValue",
-      dataId: dataId,
-      name: name,
-      department: department
-    })
-  })
-  .then(res => res.text())
-  .then(res => {
-    console.log(res);
-    resetForm();
-    readData();
-  });
-}
+      function updateData() {
+        let dataId = $("#mode").attr("data-id");
+        let name = $("#name").val();
+        let department = $("#department").val();
+        console.log(dataId, name, department);
+        google.script.run.withSuccessHandler(function(res) {
+          resetData();
+          readData();
+        }).updateDataValue(dataId, name, department); 
+      }
 
-function removeData(ele) {
-  let dataId = $(ele).closest('tr').find('td:nth-child(2)').text();
-  fetch(webAppUrl, {
-    method: "POST",
-    body: new URLSearchParams({
-      action: "removeDataValue",
-      dataId: dataId
-    })
-  })
-  .then(res => res.text())
-  .then(res => {
-    console.log(res);
-    readData();
-  });
-}
+      function removeData(ele) {
+        let dataId = $(ele).parents("tr").find("td:nth-child(2)").text();
+        console.log(dataId);
+        google.script.run.withSuccessHandler(function(res) {
+          readData();
+        }).removeDataValue(dataId); 
+      }
 
-function resetForm() {
-  $("#name").val("");
-  $("#department").val("");
-  $("#dataId").val("");
-  $("#mode").text("เพิ่ม");
-}
+      function resetData() {
+        $("#name").val("");
+        $("#department").val("");
+        setMode('add');
+      }
 
-document.addEventListener('DOMContentLoaded', function() {
-  readData();
-});
-</script>
-</body>
+      function setMode(mode, dataId) {
+        if (mode == "add") {
+          $("#mode").text("เพิ่ม");
+          $("#mode").attr("data-id", "");
+        } else if (mode == "edit") {
+          $("#mode").text("แก้ไข: " + dataId);
+          $("#mode").attr("data-id", dataId);
+        }
+      }
+    </script>
+  </body>
 </html>
