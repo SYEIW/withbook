@@ -60,106 +60,139 @@
     <script>
       readData();
 
-      function addData() {
-        let name = $("#name").val();
-        let department = $("#department").val();
-        console.log(name, department);
-        google.script.run.withSuccessHandler(function(res) {
-          resetData();
-          readData();
-        }).addDataValue(name, department);   
-      }
+const API_URL = 'https://script.google.com/macros/s/AKfycbzS1DFFmuchGo8Wd17pSmdeUuDsZeJNjKPnNGxYD1I7AbfhODK-gjHaWChZb9CkeQSa/exec';
 
-      function readData() {
-        google.script.run.withSuccessHandler(function(res) {
-          console.log(res, typeof(res));
-          try {
-            res = JSON.parse(res);
-          } catch {}
-          console.log(res, typeof(res));
-          $('#my_table').DataTable({
-            data: res,
-            columns: [
-              {
-                title: 'ประทับเวลา',
-                'render': function(data, type) {
-                  data = moment(data).format("DD/MM/YYYY HH:mm:ss");
-                  return data;
-                }
-              },
-              {title: 'ID'},
-              {title: 'ชื่อ-สกุล'},
-              {title: 'แผนก'},
-              {
-                title: 'แก้ไข',
-                'render': function(data, type) {
-                  return `<input type="button" value="แก้ไข" onclick="editData(this)">`;
-                }
-              },
-              {
-                title: 'ลบ',
-                'render': function(data, type) {
-                  return `<input type="button" value="ลบ" onclick="removeData(this)">`;
-                }
-              }
-            ],
-            "bDestroy": true
-          });
-        }).readDataValue();   
-      }
+// อ่านข้อมูล
+function readData() {
+  fetch(API_URL)
+    .then(res => res.json())
+    .then(res => {
+      console.log(res);
+      $('#my_table').DataTable({
+        data: res,
+        columns: [
+          { title: 'ประทับเวลา',
+            render: function (data, type) {
+              return moment(data).format("DD/MM/YYYY HH:mm:ss");
+            }
+          },
+          { title: 'ID' },
+          { title: 'ชื่อ-สกุล' },
+          { title: 'แผนก' },
+          { title: 'แก้ไข',
+            render: function (data, type, row) {
+              return `<input type="button" value="แก้ไข" onclick="editData('${row[1]}')">`;
+            }
+          },
+          { title: 'ลบ',
+            render: function (data, type, row) {
+              return `<input type="button" value="ลบ" onclick="removeData('${row[1]}')">`;
+            }
+          }
+        ],
+        "bDestroy": true
+      });
+    })
+    .catch(err => console.error('Read Error:', err));
+}
 
-      function editData(ele) {
-        let dataId = $(ele).parents("tr").find("td:nth-child(2)").text();
-        console.log(dataId);
-        google.script.run.withSuccessHandler(function(res) {
-          console.log(res, typeof(res));
-          try {
-            res = JSON.parse(res);
-          } catch {}
-          console.log(res, typeof(res));
-          let id = res[1];
-          let name = res[2];
-          let department = res[3];
-          setMode('edit', id);
-          $("#name").val(name);
-          $("#department").val(department);
-        }).getDataValue(dataId);   
-      }
+// เพิ่มข้อมูล
+function addData() {
+  const name = $("#name").val();
+  const department = $("#department").val();
 
-      function updateData() {
-        let dataId = $("#mode").attr("data-id");
-        let name = $("#name").val();
-        let department = $("#department").val();
-        console.log(dataId, name, department);
-        google.script.run.withSuccessHandler(function(res) {
-          resetData();
-          readData();
-        }).updateDataValue(dataId, name, department); 
-      }
+  fetch(API_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      action: 'add',
+      name: name,
+      department: department
+    })
+  })
+  .then(res => res.json())
+  .then(res => {
+    console.log(res);
+    resetData();
+    readData();
+  })
+  .catch(err => console.error('Add Error:', err));
+}
 
-      function removeData(ele) {
-        let dataId = $(ele).parents("tr").find("td:nth-child(2)").text();
-        console.log(dataId);
-        google.script.run.withSuccessHandler(function(res) {
-          readData();
-        }).removeDataValue(dataId); 
+// แก้ไขข้อมูล
+function editData(id) {
+  fetch(API_URL)
+    .then(res => res.json())
+    .then(res => {
+      const found = res.find(r => r[1] === id);
+      if (found) {
+        $("#name").val(found[2]);
+        $("#department").val(found[3]);
+        setMode('edit', id);
       }
+    });
+}
 
-      function resetData() {
-        $("#name").val("");
-        $("#department").val("");
-        setMode('add');
-      }
+// อัพเดทข้อมูล
+function updateData() {
+  const dataId = $("#mode").attr("data-id");
+  const name = $("#name").val();
+  const department = $("#department").val();
 
-      function setMode(mode, dataId) {
-        if (mode == "add") {
-          $("#mode").text("เพิ่ม");
-          $("#mode").attr("data-id", "");
-        } else if (mode == "edit") {
-          $("#mode").text("แก้ไข: " + dataId);
-          $("#mode").attr("data-id", dataId);
-        }
-      }
+  fetch(API_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      action: 'update',
+      dataId: dataId,
+      name: name,
+      department: department
+    })
+  })
+  .then(res => res.json())
+  .then(res => {
+    console.log(res);
+    resetData();
+    readData();
+  });
+}
+
+// ลบข้อมูล
+function removeData(id) {
+  if (!confirm('ยืนยันการลบ')) return;
+
+  fetch(API_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      action: 'delete',
+      dataId: id
+    })
+  })
+  .then(res => res.json())
+  .then(res => {
+    console.log(res);
+    readData();
+  });
+}
+
+// reset และ mode
+function resetData() {
+  $("#name").val("");
+  $("#department").val("");
+  setMode('add');
+}
+
+function setMode(mode, id) {
+  if (mode === 'add') {
+    $("#mode").text("เพิ่ม");
+    $("#mode").attr("data-id", "");
+  } else if (mode === 'edit') {
+    $("#mode").text("แก้ไข: " + id);
+    $("#mode").attr("data-id", id);
+  }
+}
+
     </script>
   </body>
 </html>
