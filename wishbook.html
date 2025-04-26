@@ -55,14 +55,14 @@ const webAppUrl = "https://script.google.com/macros/s/AKfycbzS1DFFmuchGo8Wd17pSm
 function addData() {
   let name = $("#name").val();
   let department = $("#department").val();
-  fetch(webAppUrl, {
-    method: "POST",
-    body: new URLSearchParams({
-      action: "addDataValue",
-      name: name,
-      department: department
-    })
-  })
+fetch(webAppUrl, {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json'
+  },
+  body: JSON.stringify(data),
+  mode: 'no-cors'  // ไม่แนะนำวิธีนี้
+})
   .then(res => res.text())
   .then(res => {
     console.log(res);
