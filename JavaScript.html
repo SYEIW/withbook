@@ -1,0 +1,107 @@
+<script>
+  readData();
+
+  function addData() {
+    let name = $("#name").val();
+    let department = $("#department").val();
+    console.log(name,department)
+    google.script.run.withSuccessHandler(function(res) {
+      resetData();
+      readData();
+    }).addDataValue(name,department);   
+  }
+
+  function readData() {
+    google.script.run.withSuccessHandler(function(res) {
+      console.log(res,typeof(res))
+      try{
+        res = JSON.parse(res);
+      } catch {}
+      console.log(res,typeof(res))
+      $('#my_table').DataTable({
+        // "createdRow": function( row, data, dataIndex ) {
+        //  $(row).attr('data-id', data[11]);
+        //},
+        data: res,
+        columns: [
+          {title:'ประทับเวลา',
+            'render':function(data,type) {
+              data=moment(data).format("DD/MM/YYYY HH:mm:ss");
+              return data;
+            }
+          },
+          {title:'ID'},
+          {title:'ชื่อ-สกุล'},
+          {title:'แผนก'},
+          {title:'แก้ไข',
+            'render':function(data,type) {
+              data=`<input type="button" value="แก้ไข" onclick="editData(this)">`;
+              return data;
+              }
+          },
+          {title:'ลบ',
+            'render':function(data,type) {
+              data=`<input type="button" value="ลบ" onclick="removeData(this)">`;
+              return data;
+            }
+          },
+        ],
+        "bDestroy": true
+      });
+    }).readDataValue();   
+  }
+
+  function editData(ele) {
+    let dataId = $(ele).parents("tr").find("td:nth-child(2)").text();
+    console.log(dataId)
+    google.script.run.withSuccessHandler(function(res) {
+      console.log(res,typeof(res))
+      try{
+        res = JSON.parse(res);
+      } catch {}
+      console.log(res,typeof(res));
+      let id = res[1];
+      let name = res[2];
+      let department = res[3];
+      setMode('edit',id);
+      $("#name").val(name);
+      $("#department").val(department);
+    }).getDataValue(dataId);   
+  }
+
+  function updateData() {
+    let dataId = $("#mode").attr("data-id");
+    let name = $("#name").val();
+    let department = $("#department").val();
+    console.log(dataId,name,department);
+    google.script.run.withSuccessHandler(function(res) {
+      resetData();
+      readData();
+    }).updateDataValue(dataId,name,department); 
+  }
+
+  function removeData(ele) {
+    let dataId = $(ele).parents("tr").find("td:nth-child(2)").text();
+    console.log(dataId)
+    google.script.run.withSuccessHandler(function(res) {
+      readData();
+    }).removeDataValue(dataId); 
+  }
+
+  function resetData() {
+    $("#name").val("");
+    $("#department").val("");
+    setMode('add');
+  }
+
+  function setMode(mode,dataId) {
+    if (mode == "add") {
+      $("#mode").text("เพิ่ม");
+      $("#mode").attr("data-id","");
+    } else if (mode == "edit") {
+      $("#mode").text("แก้ไข: "+dataId);
+      $("#mode").attr("data-id",dataId);
+    }
+  }
+  
+</script>
